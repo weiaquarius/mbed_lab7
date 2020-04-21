@@ -24,37 +24,21 @@ while True:
       print("Data Num =", len(data))
     elif '---delete---' in line:
       if len(data) > 0:
-
         data.pop()
-
         print("Data deleted.")
-
       print("Data Num =", len(data))
-
     else:
-
       print(line, end="")
-
       data_new.append(line)
 
   except KeyboardInterrupt:
-
     filename = "gesture_"+str(time.strftime("%Y%m%d%H%M%S"))+".txt"
-
     with open(filename, "w") as f:
-
       for lines in data:
-
         f.write("-,-,-\n")
-
         for line in lines:
-
           f.write(line)
-
     print("Exiting...")
-
     print("Save file in", filename)
-
     s.close()
-
     sys.exit()
