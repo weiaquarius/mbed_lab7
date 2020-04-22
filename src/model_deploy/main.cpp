@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
 
   // needed by this graph.
 
-  static tflite::MicroOpResolver<5> micro_op_resolver;
+  static tflite::MicroOpResolver<6> micro_op_resolver;
 
   micro_op_resolver.AddBuiltin(
 
@@ -181,6 +181,9 @@ int main(int argc, char* argv[]) {
   micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_SOFTMAX,
 
                                tflite::ops::micro::Register_SOFTMAX());
+  
+  micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_RESHAPE,
+                             tflite::ops::micro::Register_RESHAPE(), 1);
 
 
   // Build an interpreter to run the model with
@@ -195,6 +198,7 @@ int main(int argc, char* argv[]) {
   // Allocate memory from the tensor_arena for the model's tensors
 
   interpreter->AllocateTensors();
+
 
 
   // Obtain pointer to the model's input tensor
