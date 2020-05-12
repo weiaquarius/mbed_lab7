@@ -2,6 +2,7 @@
 #include "mbed.h"
 #include "fsl_port.h"
 #include "fsl_gpio.h"
+#include "iostream"
 #include "stdint.h"
 #include "cmath"
 #include "uLCD_4DGL.h"
@@ -29,7 +30,7 @@ Timer main_timer;
 DigitalOut redLED(LED1);
 DigitalOut greenLED(LED2);
 DigitalOut blueLED(LED3);
-DigitalIn Switch(SW3);   // select the choice
+InterruptIn sw3(SW3);   // select the choice
 InterruptIn button(SW2); // raised and enter the mode selection page 
 
 EventQueue _queue_DNN;
@@ -40,10 +41,11 @@ Thread _thread_DNN;
 Thread _thread_playmusic;
 Thread _thread_mainmenu;
 
-int now_song = 0;
+int now_song = 2;
 int now_mode = 0;
 //song menu = 0; mode menu = 1;
 int now_menu = 0;
+int gesture_id = 0;
 
 float signal_arr[signalLength];
 int16_t waveform[kAudioTxBufferSize];
@@ -129,10 +131,28 @@ void stopPlayNoteC(void) {_queue_playmusic.cancel(idC);}
 
 void PlayMusic()
 {
-    _queue_playmusic.event(loadSignalHandler);
-    _queue_playmusic.event(playNoteC);
-    _queue_playmusic.event(stopPlayNoteC);
-
+    //if SW3 is pressed, end gesture
+    if(now_menu == 0)
+    { // start play song
+        uLCD.printf("\nplay song\n");
+        // _queue_playmusic.event(loadSignalHandler);
+        // _queue_playmusic.event(playNoteC);
+        // _queue_playmusic.event(stopPlayNoteC);
+    }
+    else if(now_menu == 1)
+    {
+      if(now_mode == 0 || now_mode ==1)
+      { // prev or next song
+          uLCD.printf("\nplay song\n");
+          // _queue_playmusic.event(loadSignalHandler);
+          // _queue_playmusic.event(playNoteC);
+          // _queue_playmusic.event(stopPlayNoteC);
+      }
+      else if(now_mode == 2)
+      { // head to display song menu
+        _queue_mainmenu.call(Display_song);
+      } 
+    }
 }
 
 // Return the result of the last prediction
@@ -174,57 +194,77 @@ int PredictGesture(float* output) {
   return this_predict;
 }
 
+
 void Gesture()
 {
   greenLED = 1;
   redLED = 1;
   blueLED = 0;
   int gesture_index;
-  while(true){
+  uLCD.cls();
+  uLCD.printf("\nStart Selecting\n");
+
+  /*
+  // Attempt to read new data from the accelerometer
+  got_data = ReadAccelerometer(error_reporter, model_input->data.f,
+                              input_length, should_clear_buffer);
+  // If there was no new data,
+  // don't try to clear the buffer again and wait until next time
+  if (!got_data) {
+    should_clear_buffer = false;
+    continue;
+  }
+  uLCD.printf("\n%d\n", gesture_index);
+  // Run inference, and report any error
+  TfLiteStatus invoke_status = interpreter->Invoke();
+  if (invoke_status != kTfLiteOk) {
+    error_reporter->Report("Invoke failed on index: %d\n", begin_index);
+    continue;
+  }
+  // Analyze the results to obtain a prediction
+  gesture_index = PredictGesture(interpreter->output(0)->data.f);
+
+  // Clear the buffer next time we read data
+  should_clear_buffer = gesture_index < label_num;
+
+  // use gesture to define which mode
+  // first check is song menu or mode menu
+  */
+  int i_gesture = 0;
+  
+  wait(1);
+  while(i_gesture == 0)
+  {
     button.rise(_queue_mainmenu.event(Display_mode));
-    // Attempt to read new data from the accelerometer
-    got_data = ReadAccelerometer(error_reporter, model_input->data.f,
-                                input_length, should_clear_buffer);
-    // If there was no new data,
-    // don't try to clear the buffer again and wait until next time
-    if (!got_data) {
-      should_clear_buffer = false;
-      continue;
-    }
-    // Run inference, and report any error
-    TfLiteStatus invoke_status = interpreter->Invoke();
-    if (invoke_status != kTfLiteOk) {
-      error_reporter->Report("Invoke failed on index: %d\n", begin_index);
-      continue;
-    }
-    // Analyze the results to obtain a prediction
-    gesture_index = PredictGesture(interpreter->output(0)->data.f);
-
-    // Clear the buffer next time we read data
-    should_clear_buffer = gesture_index < label_num;
-
-    // use gesture to define which mode
-    // first check is song menu or mode menu
     if(now_menu == 0)
     { // song menu 
         if(gesture_index == 0)
         { // previous 
-          now_song = (now_song - 1) %2;
+          now_song = (now_song - 1);
+          if(now_song == (-1))
+          {
+            now_mode = 1;
+          }
         }
         else if(gesture_index == 1)
         { // next
-          now_song = (now_song + 1) %2;
+          now_song = (now_song + 1);
+          if(now_mode == 2)
+          {
+            now_mode = 0;
+          }
         }
-        
         // change the screen display 
         if(now_song == 0)
         {
           uLCD.cls();
           uLCD.textbackground_color(BLACK);
           uLCD.printf("\n****SONG MENU****\n");
-          uLCD.printf("\npress SW3 to select then SW2 to enter\n");
           uLCD.textbackground_color(BLUE);
-          uLCD.printf("\n1.TWINKLE \n");
+          uLCD.printf("\n SW2-> mode menu\n");
+          uLCD.printf("\n SW3-> play song\n");
+          uLCD.textbackground_color(RED);
+          uLCD.printf("1.TWINKLE \n");
           uLCD.textbackground_color(BLACK);
           uLCD.printf("\n  song length = 48 \n");
           uLCD.printf("\n2.HAPPY BIRTHDAY\n");
@@ -235,24 +275,35 @@ void Gesture()
           uLCD.cls();
           uLCD.textbackground_color(BLACK);
           uLCD.printf("\n****SONG MENU****\n");
-          uLCD.printf("\npress SW3 to select then SW2 to enter\n");
-          uLCD.printf("\n1.TWINKLE \n");
-          uLCD.printf("\n  song length = 48 \n");
           uLCD.textbackground_color(BLUE);
+          uLCD.printf("\n SW2-> mode menu\n");
+          uLCD.printf("\n SW3-> play song\n");
+          uLCD.textbackground_color(BLACK);
+          uLCD.printf("1.TWINKLE \n");
+          uLCD.printf("\n  song length = 48 \n");
+          uLCD.textbackground_color(RED);
           uLCD.printf("\n2.HAPPY BIRTHDAY\n");
           uLCD.textbackground_color(BLACK);
           uLCD.printf("\n  song length = 32 \n");
         }
     }
-    else if(now_menu ==1)
+    else if(now_menu == 1)
     { //mode menu
         if(gesture_index == 0)
         { // previous 
-          now_mode = (now_mode - 1) %3;
+          now_mode = (now_mode - 1);
+          if(now_mode == (-1))
+          {
+            now_mode = 2;
+          }
         }
         else if(gesture_index == 1)
         { // next
-          now_mode = (now_mode + 1) %3;
+          now_mode = (now_mode + 1);
+          if(now_mode == (3))
+          {
+            now_mode = 0;
+          }
         }
 
         //change the screen display
@@ -260,8 +311,11 @@ void Gesture()
         {
             uLCD.cls();
             uLCD.textbackground_color(BLACK);
-            uLCD.printf("\npress SW3 to select then SW2 to enter\n");
+            uLCD.printf("\n####MODE MENU####\n");
             uLCD.textbackground_color(BLUE);
+            uLCD.printf("\n SW2-> mode menu\n");
+            uLCD.printf("\n SW3-> play song\n");
+            uLCD.textbackground_color(RED);
             uLCD.printf("\n1.previous song\n");
             uLCD.textbackground_color(BLACK);
             uLCD.printf("\n2.next song\n");
@@ -272,11 +326,14 @@ void Gesture()
             uLCD.cls();
             uLCD.textbackground_color(BLACK);
             uLCD.printf("\n####MODE MENU####\n");
-            uLCD.printf("\npress SW3 to select then SW2 to enter\n");
+            uLCD.textbackground_color(BLUE);
+            uLCD.printf("\n SW2-> mode menu\n");
+            uLCD.printf("\n SW3-> play song\n");
             uLCD.textbackground_color(BLACK);
             uLCD.printf("\n1.previous song\n");
-            uLCD.textbackground_color(BLUE);
+            uLCD.textbackground_color(RED);
             uLCD.printf("\n2.next song\n");
+            uLCD.textbackground_color(BLACK);
             uLCD.printf("\n3.song menu\n");
         }
         else if(now_mode ==2)
@@ -284,36 +341,25 @@ void Gesture()
             uLCD.cls();
             uLCD.textbackground_color(BLACK);
             uLCD.printf("\n####MODE MENU####\n");
-            uLCD.printf("\npress SW3 to select then SW2 to enter\n");
+            uLCD.textbackground_color(BLUE);
+            uLCD.printf("\n SW2-> mode menu\n");
+            uLCD.printf("\n SW3-> play song\n");
             uLCD.textbackground_color(BLACK);
             uLCD.printf("\n1.previous song\n");
             uLCD.printf("\n2.next song\n");
-            uLCD.textbackground_color(BLUE);
+            uLCD.textbackground_color(RED);
             uLCD.printf("\n3.song menu\n");
         }
-    }
-
-    if(Switch == 0)
-    { //if SW3 is pressed, end gesture
-      if(now_menu == 0)
-      { // start play song
-        button.rise(_queue_playmusic.event(PlayMusic));
-      }
-      else if(now_menu == 1)
-      {
-        if(now_mode == 0 || now_mode ==1)
-        { // prev or next song
-          button.rise(_queue_playmusic.event(PlayMusic));
-        }
-        else if(now_mode == 2)
-        { // head to display song menu
-          button.rise(_queue_mainmenu.event(Display_song));
+        else
+        {
+          uLCD.printf("in while333");
         }
         
-      }
-      break;
     }
+    
+    i_gesture ++;
   }
+  sw3.rise(_queue_playmusic.event(PlayMusic));
 }
 
 
@@ -323,19 +369,24 @@ void Display_song()
     greenLED = 0;
     redLED = 1;
     blueLED = 1;
+
     uLCD.cls();
+    uLCD.textbackground_color(BLACK);
     uLCD.printf("\n****SONG MENU****\n");
+    uLCD.textbackground_color(BLUE);
+    uLCD.printf("\n SW2-> mode menu\n");
+    uLCD.printf("\n SW3-> song select\n");
+    uLCD.textbackground_color(BLACK);
     uLCD.printf("\n1.TWINKLE \n");
-    uLCD.printf("\n  song length = 48 \n");
+    uLCD.printf("  song length = 48 \n");
     uLCD.printf("\n2.HAPPY BIRTHDAY\n");
-    uLCD.printf("\n  song length = 32 \n");
+    uLCD.printf("  song length = 32 \n");
+    wait(0.5);
     // if SW2 is pressed, enter mode menu
     button.rise(_queue_mainmenu.event(Display_mode));
     // press SW3 to enter gesture node
-    if(Switch == 0 )
-    {
-      _queue_DNN.call(Gesture);
-    }
+    sw3.rise(_queue_DNN.event(Gesture));
+    //_queue_DNN.call(Gesture);
 }
 
 void Display_mode()
@@ -346,18 +397,22 @@ void Display_mode()
     blueLED = 1;
 
     uLCD.cls();
-    //uLCD.textbackground_color(BLACK);
+    uLCD.textbackground_color(BLACK);
     uLCD.printf("\n####MODE MENU####\n");
     uLCD.textbackground_color(BLUE);
-    uLCD.printf("\npress SW2 to select\n");
+    uLCD.printf("\n SW2-> mode menu\n");
+    uLCD.printf("\n SW3-> mode select\n");
     uLCD.textbackground_color(BLACK);
     uLCD.printf("\n1.previous song\n");
     uLCD.printf("\n2.next song\n");
     uLCD.printf("\n3.song menu\n");
-
-    // entry  choosing mode, the greenLED will on 
-
-    button.rise(_queue_DNN.event(Gesture));
+    wait(1);
+    //entry  choosing mode, the greenLED will on 
+    //_queue_DNN.call(Gesture);
+    // if SW2 is pressed, enter mode menu
+    button.rise(_queue_mainmenu.event(Display_mode));
+    // press SW3 to enter gesture node
+    sw3.rise(_queue_DNN.event(Gesture));
 }
 
 int main(void)
@@ -440,11 +495,32 @@ int main(void)
         uLCD.printf("\nEnter Song Menu\n");
         uLCD.printf("\n in 5s !\n");
         uLCD.printf("\nEnjoy!!\n"); 
+        wait(5);
+        
         // enter song menu
-        _queue_mainmenu.call_in(5000, Display_song);
+        //_queue_mainmenu.call_in(5000, Display_song);
+        now_menu = 0; 
+        greenLED = 0;
+        redLED = 1;
+        blueLED = 1;
+        uLCD.cls();
+        uLCD.textbackground_color(BLACK);
+        uLCD.printf("\n****SONG MENU****\n");
+        uLCD.textbackground_color(BLUE);
+        uLCD.printf("\n SW2-> mode menu\n");
+        uLCD.printf("\n SW3-> song select\n");
+        uLCD.textbackground_color(BLACK);
+        uLCD.printf("\n1.TWINKLE \n");
+        uLCD.printf("  song length = 48 \n");
+        uLCD.printf("\n2.HAPPY BIRTHDAY\n");
+        uLCD.printf("  song length = 32 \n");
+        wait(0.5);
+        // if SW2 is pressed, enter mode menu
+        button.rise(_queue_mainmenu.event(Display_mode));
+        // press SW3 to enter gesture node
+        sw3.rise(_queue_DNN.event(Gesture));
+        //_queue_DNN.call(Gesture);
 
-        // enter song menu
-        //button.rise(_queue_mainmenu.event(Display_song));
 }
 
 
