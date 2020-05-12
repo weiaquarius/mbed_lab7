@@ -2,7 +2,7 @@
     {
         "module": "4DGL-uLCD-SE/uLCD_4DGL_Text.o",
         "size": {
-            ".text": 376,
+            ".text": 336,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -35,9 +35,9 @@
     {
         "module": "[fill]",
         "size": {
-            ".text": 276,
-            ".data": 14,
-            ".bss": 58,
+            ".text": 277,
+            ".data": 13,
+            ".bss": 64,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -112,9 +112,9 @@
     {
         "module": "accelerometer_handler.o",
         "size": {
-            ".text": 184,
-            ".data": 0,
-            ".bss": 26,
+            ".text": 584,
+            ".data": 9,
+            ".bss": 2438,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -134,10 +134,10 @@
     {
         "module": "main.o",
         "size": {
-            ".text": 3883,
+            ".text": 4630,
             ".data": 40,
-            ".bss": 69166,
-            ".text-delta": -8,
+            ".bss": 69180,
+            ".text-delta": 8,
             ".data-delta": 0,
             ".bss-delta": 0
         }
@@ -156,7 +156,7 @@
     {
         "module": "mbed-os/drivers",
         "size": {
-            ".text": 2106,
+            ".text": 2064,
             ".data": 0,
             ".bss": 44,
             ".text-delta": 0,
@@ -222,7 +222,7 @@
     {
         "module": "tensorflowlite_mbed/tensorflow",
         "size": {
-            ".text": 26404,
+            ".text": 26866,
             ".data": 160,
             ".bss": 108,
             ".text-delta": 0,
@@ -232,10 +232,10 @@
     },
     {
         "summary": {
-            "static_ram": 80720,
+            "static_ram": 83160,
             "static_ram_delta": 0,
-            "total_flash": 129388,
-            "total_flash_delta": -8
+            "total_flash": 130924,
+            "total_flash_delta": 8
         }
     }
 ]
