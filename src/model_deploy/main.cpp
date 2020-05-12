@@ -37,7 +37,7 @@ EventQueue _queue_DNN;
 EventQueue _queue_playmusic;
 EventQueue _queue_mainmenu;
 
-Thread _thread_DNN; 
+Thread _thread_DNN/*(osPriorityNormal, 90*1024)*/; 
 Thread _thread_playmusic;
 Thread _thread_mainmenu;
 
@@ -134,19 +134,21 @@ void PlayMusic()
     //if SW3 is pressed, end gesture
     if(now_menu == 0)
     { // start play song
-        uLCD.printf("\nplay song\n");
-        // _queue_playmusic.event(loadSignalHandler);
-        // _queue_playmusic.event(playNoteC);
-        // _queue_playmusic.event(stopPlayNoteC);
+        uLCD.printf("\nplay song %d\n", now_song);
+        pc.printf("%d\r\n", now_song);
+        _queue_playmusic.event(loadSignalHandler);
+        _queue_playmusic.event(playNoteC);
+        _queue_playmusic.event(stopPlayNoteC);
     }
     else if(now_menu == 1)
     {
       if(now_mode == 0 || now_mode ==1)
       { // prev or next song
-          uLCD.printf("\nplay song\n");
-          // _queue_playmusic.event(loadSignalHandler);
-          // _queue_playmusic.event(playNoteC);
-          // _queue_playmusic.event(stopPlayNoteC);
+          uLCD.printf("\nplay song %d\n", now_song);
+          pc.printf("%d\r\n", now_song);
+          _queue_playmusic.event(loadSignalHandler);
+          _queue_playmusic.event(playNoteC);
+          _queue_playmusic.event(stopPlayNoteC);
       }
       else if(now_mode == 2)
       { // head to display song menu
@@ -203,39 +205,41 @@ void Gesture()
   int gesture_index;
   uLCD.cls();
   uLCD.printf("\nStart Selecting\n");
-
-  /*
-  // Attempt to read new data from the accelerometer
-  got_data = ReadAccelerometer(error_reporter, model_input->data.f,
-                              input_length, should_clear_buffer);
-  // If there was no new data,
-  // don't try to clear the buffer again and wait until next time
-  if (!got_data) {
-    should_clear_buffer = false;
-    continue;
-  }
-  uLCD.printf("\n%d\n", gesture_index);
-  // Run inference, and report any error
-  TfLiteStatus invoke_status = interpreter->Invoke();
-  if (invoke_status != kTfLiteOk) {
-    error_reporter->Report("Invoke failed on index: %d\n", begin_index);
-    continue;
-  }
-  // Analyze the results to obtain a prediction
-  gesture_index = PredictGesture(interpreter->output(0)->data.f);
-
-  // Clear the buffer next time we read data
-  should_clear_buffer = gesture_index < label_num;
-
-  // use gesture to define which mode
-  // first check is song menu or mode menu
-  */
   int i_gesture = 0;
   
   wait(1);
   while(i_gesture == 0)
   {
-    button.rise(_queue_mainmenu.event(Display_mode));
+    //button.rise(_queue_mainmenu.event(Display_mode));
+
+    /////////////////////////////////////////////////
+    // start to check gesture
+    // Attempt to read new data from the accelerometer
+    /*
+    got_data = ReadAccelerometer(error_reporter, model_input->data.f,
+                                input_length, should_clear_buffer);
+    // If there was no new data,
+    // don't try to clear the buffer again and wait until next time
+    if (!got_data) {
+      should_clear_buffer = false;
+      continue;
+    }
+    uLCD.printf("\n%d\n", gesture_index);
+    // Run inference, and report any error
+    TfLiteStatus invoke_status = interpreter->Invoke();
+    if (invoke_status != kTfLiteOk) {
+      error_reporter->Report("Invoke failed on index: %d\n", begin_index);
+      continue;
+    }
+    // Analyze the results to obtain a prediction
+    gesture_index = PredictGesture(interpreter->output(0)->data.f);
+
+    // Clear the buffer next time we read data
+    should_clear_buffer = gesture_index < label_num;  
+    */
+    /////////////////////////////////////////////////
+
+
     if(now_menu == 0)
     { // song menu 
         if(gesture_index == 0)
