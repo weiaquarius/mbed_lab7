@@ -33,15 +33,15 @@ DigitalOut blueLED(LED3);
 InterruptIn sw3(SW3);   // select the choice
 InterruptIn button(SW2); // raised and enter the mode selection page 
 
-EventQueue _queue_DNN;
+// EventQueue _queue_DNN;
 EventQueue _queue_playmusic;
 EventQueue _queue_mainmenu;
 
-Thread _thread_DNN(osPriorityNormal, 90*1024); 
+// Thread _thread_DNN; 
 Thread _thread_playmusic;
-Thread _thread_mainmenu;
+Thread _thread_mainmenu(osPriorityNormal, 100*1024);
 
-int now_song = 2;
+int now_song = 0;
 int now_mode = 0;
 //song menu = 0; mode menu = 1;
 int now_menu = 0;
@@ -70,7 +70,7 @@ bool got_data = false;
 static tflite::MicroErrorReporter micro_error_reporter;
 tflite::ErrorReporter* error_reporter = &micro_error_reporter;
 const tflite::Model* model;
-static tflite::MicroOpResolver<5> micro_op_resolver;
+static tflite::MicroOpResolver<6> micro_op_resolver;
 tflite::MicroInterpreter* interpreter;
 TfLiteTensor* model_input;
 int input_length;
@@ -79,7 +79,6 @@ int input_length;
 class Song{
     public:
         int length;
-        // int A[length];
 };
 Song TWINKLE;
 Song BIRTHDAY;
@@ -139,7 +138,7 @@ void PlayMusic()
     }
     else
     { // start play song
-        uLCD.printf("\nplay song %d\n", now_song);
+        uLCD.printf("\nplay song %d\n", now_song+1);
         pc.printf("%d\r\n", now_song);
         _queue_playmusic.event(loadSignalHandler);
         _queue_playmusic.event(playNoteC);
@@ -202,53 +201,67 @@ void Gesture()
   while(i_gesture == 0)
   {
     //button.rise(_queue_mainmenu.event(Display_mode));
-    /*
+    
     /////////////////////////////////////////////////
     // start to check gesture
     // Attempt to read new data from the accelerometer
     redLED = 0;
+    uLCD.printf("\nStart Selecting2\n");
     got_data = ReadAccelerometer(error_reporter, model_input->data.f,
                                 input_length, should_clear_buffer);
+    uLCD.printf("\nStart Selecting23\n");
+    uLCD.printf("%d", got_data);
     // If there was no new data,
     // don't try to clear the buffer again and wait until next time
     if (!got_data) {
       should_clear_buffer = false;
       continue;
     }
-    uLCD.printf("\n%d\n", gesture_index);
+
+    uLCD.printf("\nStart Selecting3\n");
+    
     // Run inference, and report any error
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
       error_reporter->Report("Invoke failed on index: %d\n", begin_index);
       continue;
     }
+    uLCD.printf("\nStart Selecting111\n");
     // Analyze the results to obtain a prediction
     gesture_index = PredictGesture(interpreter->output(0)->data.f);
-
+    uLCD.printf("\nStart Selecting222\n");
     // Clear the buffer next time we read data
     should_clear_buffer = gesture_index < label_num;  
-    redLED = 1;
-    */
+    // redLED = 1;
+
     /////////////////////////////////////////////////
+    uLCD.cls();
+    uLCD.printf("\nNowwwww\n");
+    uLCD.printf("\n %d \n ", now_menu);
+    
+    uLCD.printf("\n %d \n ", now_mode);
+    uLCD.printf("\n %d \n ", gesture_index);
 
     if(now_menu == 0)
     { // song menu 
-        if(gesture_index == 0)
+        if(gesture_index == 1)
         { // previous 
           now_song = (now_song - 1);
           if(now_song == (-1))
           {
-            now_mode = 1;
+            now_song = 1;
           }
         }
-        else if(gesture_index == 1)
+        else if(gesture_index == 2)
         { // next
           now_song = (now_song + 1);
-          if(now_mode == 2)
+          if(now_song == 2)
           {
-            now_mode = 0;
+            now_song = 0;
           }
         }
+        uLCD.printf("\n %d \n ", now_song);
+
         // change the screen display 
         if(now_song == 0)
         {
@@ -281,24 +294,40 @@ void Gesture()
           uLCD.textbackground_color(BLACK);
           uLCD.printf("\n  song length = 32 \n");
         }
+
     }
     else if(now_menu == 1)
     { //mode menu
-        if(gesture_index == 0)
+        if(gesture_index == 1)
         { // previous 
           now_mode = (now_mode - 1);
           if(now_mode == (-1))
           {
             now_mode = 2;
           }
+
+          // song -1 
+          now_song = (now_song - 1);
+          if(now_song == (-1))
+          {
+            now_song = 1;
+          }
         }
-        else if(gesture_index == 1)
+        else if(gesture_index == 2)
         { // next
           now_mode = (now_mode + 1);
           if(now_mode == (3))
           {
             now_mode = 0;
           }
+
+          // song +1
+          now_song = (now_song + 1);
+          if(now_song == 2)
+          {
+            now_song = 0;
+          } 
+
         }
 
         //change the screen display
@@ -338,23 +367,21 @@ void Gesture()
             uLCD.printf("\n####MODE MENU####\n");
             uLCD.textbackground_color(BLUE);
             uLCD.printf("\n SW2-> mode menu\n");
-            uLCD.printf("\n SW3-> play song\n");
+            uLCD.printf("\n SW3-> song menu\n");
             uLCD.textbackground_color(BLACK);
             uLCD.printf("\n1.previous song\n");
             uLCD.printf("\n2.next song\n");
             uLCD.textbackground_color(RED);
             uLCD.printf("\n3.song menu\n");
+            i_gesture ++;
+            sw3.rise(_queue_mainmenu.event(Display_song));
+            wait(3);
         }
-        else
-        {
-          uLCD.printf("in while333");
-        }
-        
     }
-    
     i_gesture ++;
+    sw3.rise(_queue_playmusic.event(PlayMusic));
+    wait(3);
   }
-  sw3.rise(_queue_playmusic.event(PlayMusic));
 }
 
 
@@ -380,7 +407,8 @@ void Display_song()
     // if SW2 is pressed, enter mode menu
     button.rise(_queue_mainmenu.event(Display_mode));
     // press SW3 to enter gesture node
-    sw3.rise(_queue_DNN.event(Gesture));
+    //sw3.rise(_queue_DNN.event(Gesture));
+    sw3.rise(_queue_mainmenu.event(Gesture));
     //_queue_DNN.call(Gesture);
 }
 
@@ -407,12 +435,13 @@ void Display_mode()
     // if SW2 is pressed, enter mode menu
     button.rise(_queue_mainmenu.event(Display_mode));
     // press SW3 to enter gesture node
-    sw3.rise(_queue_DNN.event(Gesture));
+    //sw3.rise(_queue_DNN.event(Gesture));
+    sw3.rise(_queue_mainmenu.event(Gesture));
 }
 
 int main(void)
 {
-    _thread_DNN.start(callback(&_queue_DNN, &EventQueue::dispatch_forever));
+    // _thread_DNN.start(callback(&_queue_DNN, &EventQueue::dispatch_forever));
     _thread_playmusic.start(callback(&_queue_playmusic, &EventQueue::dispatch_forever));
     _thread_mainmenu.start(callback(&_queue_mainmenu, &EventQueue::dispatch_forever));
     
@@ -447,6 +476,8 @@ int main(void)
                                 tflite::ops::micro::Register_FULLY_CONNECTED());
     micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_SOFTMAX,
                                 tflite::ops::micro::Register_SOFTMAX());
+    micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_RESHAPE,
+                            tflite::ops::micro::Register_RESHAPE(), 1);
 
     // Build an interpreter to run the model with
     static tflite::MicroInterpreter static_interpreter(
@@ -513,7 +544,8 @@ int main(void)
         // if SW2 is pressed, enter mode menu
         button.rise(_queue_mainmenu.event(Display_mode));
         // press SW3 to enter gesture node
-        sw3.rise(_queue_DNN.event(Gesture));
+        //sw3.rise(_queue_DNN.event(Gesture));
+        sw3.rise(_queue_mainmenu.event(Gesture));
         //_queue_DNN.call(Gesture);
 
 }
