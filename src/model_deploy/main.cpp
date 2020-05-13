@@ -37,7 +37,7 @@ EventQueue _queue_DNN;
 EventQueue _queue_playmusic;
 EventQueue _queue_mainmenu;
 
-Thread _thread_DNN/*(osPriorityNormal, 90*1024)*/; 
+Thread _thread_DNN(osPriorityNormal, 90*1024); 
 Thread _thread_playmusic;
 Thread _thread_mainmenu;
 
@@ -79,6 +79,7 @@ int input_length;
 class Song{
     public:
         int length;
+        // int A[length];
 };
 Song TWINKLE;
 Song BIRTHDAY;
@@ -132,7 +133,11 @@ void stopPlayNoteC(void) {_queue_playmusic.cancel(idC);}
 void PlayMusic()
 {
     //if SW3 is pressed, end gesture
-    if(now_menu == 0)
+    if(now_menu == 1 && now_mode ==2)
+    { // head to display song menu
+        _queue_mainmenu.call(Display_song);
+    }
+    else
     { // start play song
         uLCD.printf("\nplay song %d\n", now_song);
         pc.printf("%d\r\n", now_song);
@@ -140,21 +145,7 @@ void PlayMusic()
         _queue_playmusic.event(playNoteC);
         _queue_playmusic.event(stopPlayNoteC);
     }
-    else if(now_menu == 1)
-    {
-      if(now_mode == 0 || now_mode ==1)
-      { // prev or next song
-          uLCD.printf("\nplay song %d\n", now_song);
-          pc.printf("%d\r\n", now_song);
-          _queue_playmusic.event(loadSignalHandler);
-          _queue_playmusic.event(playNoteC);
-          _queue_playmusic.event(stopPlayNoteC);
-      }
-      else if(now_mode == 2)
-      { // head to display song menu
-        _queue_mainmenu.call(Display_song);
-      } 
-    }
+    
 }
 
 // Return the result of the last prediction
@@ -211,11 +202,11 @@ void Gesture()
   while(i_gesture == 0)
   {
     //button.rise(_queue_mainmenu.event(Display_mode));
-
+    /*
     /////////////////////////////////////////////////
     // start to check gesture
     // Attempt to read new data from the accelerometer
-    /*
+    redLED = 0;
     got_data = ReadAccelerometer(error_reporter, model_input->data.f,
                                 input_length, should_clear_buffer);
     // If there was no new data,
@@ -236,9 +227,9 @@ void Gesture()
 
     // Clear the buffer next time we read data
     should_clear_buffer = gesture_index < label_num;  
+    redLED = 1;
     */
     /////////////////////////////////////////////////
-
 
     if(now_menu == 0)
     { // song menu 
