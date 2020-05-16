@@ -35,10 +35,10 @@
     {
         "module": "[fill]",
         "size": {
-            ".text": 277,
-            ".data": 13,
-            ".bss": 64,
-            ".text-delta": 0,
+            ".text": 577,
+            ".data": 24,
+            ".bss": 61,
+            ".text-delta": -4,
             ".data-delta": 0,
             ".bss-delta": 0
         }
@@ -46,9 +46,9 @@
     {
         "module": "[lib]/c.a",
         "size": {
-            ".text": 38434,
-            ".data": 2472,
-            ".bss": 89,
+            ".text": 77531,
+            ".data": 2572,
+            ".bss": 127,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -57,7 +57,7 @@
     {
         "module": "[lib]/gcc.a",
         "size": {
-            ".text": 3452,
+            ".text": 7304,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -68,7 +68,7 @@
     {
         "module": "[lib]/m.a",
         "size": {
-            ".text": 2417,
+            ".text": 2425,
             ".data": 1,
             ".bss": 0,
             ".text-delta": 0,
@@ -101,9 +101,9 @@
     {
         "module": "[lib]/stdc++.a",
         "size": {
-            ".text": 40,
-            ".data": 0,
-            ".bss": 16,
+            ".text": 170135,
+            ".data": 145,
+            ".bss": 5680,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -123,7 +123,7 @@
     {
         "module": "magic_wand_model_data.o",
         "size": {
-            ".text": 12384,
+            ".text": 12316,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -134,10 +134,10 @@
     {
         "module": "main.o",
         "size": {
-            ".text": 4630,
-            ".data": 40,
-            ".bss": 69180,
-            ".text-delta": 8,
+            ".text": 5778,
+            ".data": 32,
+            ".bss": 65065,
+            ".text-delta": 116,
             ".data-delta": 0,
             ".bss-delta": 0
         }
@@ -156,7 +156,7 @@
     {
         "module": "mbed-os/drivers",
         "size": {
-            ".text": 2064,
+            ".text": 2140,
             ".data": 0,
             ".bss": 44,
             ".text-delta": 0,
@@ -189,7 +189,7 @@
     {
         "module": "mbed-os/platform",
         "size": {
-            ".text": 6676,
+            ".text": 6712,
             ".data": 261,
             ".bss": 309,
             ".text-delta": 0,
@@ -200,7 +200,7 @@
     {
         "module": "mbed-os/rtos",
         "size": {
-            ".text": 10103,
+            ".text": 10131,
             ".data": 168,
             ".bss": 5980,
             ".text-delta": 0,
@@ -222,8 +222,8 @@
     {
         "module": "tensorflowlite_mbed/tensorflow",
         "size": {
-            ".text": 26866,
-            ".data": 160,
+            ".text": 27511,
+            ".data": 192,
             ".bss": 108,
             ".text-delta": 0,
             ".data-delta": 0,
@@ -232,10 +232,10 @@
     },
     {
         "summary": {
-            "static_ram": 83160,
+            "static_ram": 85024,
             "static_ram_delta": 0,
-            "total_flash": 130924,
-            "total_flash_delta": 8
+            "total_flash": 346421,
+            "total_flash_delta": 112
         }
     }
 ]
