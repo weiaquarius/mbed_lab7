@@ -32,8 +32,10 @@ Timer main_timer;
 DigitalOut redLED(LED1);
 DigitalOut greenLED(LED2);
 DigitalOut blueLED(LED3);
-DigitalIn Switch(SW3);   // select the choice
-InterruptIn button(SW2); // raised and enter the mode selection page 
+DigitalIn Switch(SW3);  // select the choice
+InterruptIn Button(SW2);  // song to mode 
+
+bool songtomode = false;
 
 // EventQueue _queue_DNN;
 EventQueue _queue_playmusic;
@@ -413,7 +415,14 @@ void Gesture()
     greenLED = 0;
     wait(1);
     greenLED = 1;
-    // button.rise(_queue_mainmenu.event(Display_mode));
+    
+    
+    // if SW2 is pressed
+    if(songtomode)
+    {
+      songtomode = false;
+      Display_mode();
+    }
     // if SW3 is pressed
     if( Switch == 0 )
     {
@@ -481,11 +490,17 @@ void Display_mode()
     Gesture();
 }
 
+void StoM()
+{
+  songtomode = true;
+}
+
 int main(void)
 {
     // _thread_DNN.start(callback(&_queue_DNN, &EventQueue::dispatch_forever));
     // _thread_playmusic.start(callback(&_queue_playmusic, &EventQueue::dispatch_forever));
     _thread_mainmenu.start(callback(&_queue_mainmenu, &EventQueue::dispatch_forever));
+    Button.rise(&StoM);
     
     /******** SET UP THE MODEL ********/
 
