@@ -45,13 +45,16 @@ EventQueue _queue_mainmenu;
 Thread _thread_playmusic;
 Thread _thread_mainmenu(osPriorityNormal, 100*1024);
 
-int now_song = 0;
+int now_song = 2;
 int now_mode = 0;
 //song menu = 0; mode menu = 1;
 int now_menu = 0;
 int gesture_id = 0;
 
 float signal_arr[signalLength];
+float signal_twinkle[signalLength];
+float signal_birthday[signalLength];
+float signal_tiger[signalLength];
 int16_t waveform[kAudioTxBufferSize];
 char serialInBuffer[bufferLength];
 int serialCount = 0;
@@ -88,11 +91,12 @@ void Gesture();
 
 void loadSignal(void)
 {
-  uLCD.printf("\n in load signal\n");
+  uLCD.printf("\nStart to load signal...\n");
+  greenLED = 0;
   int i = 0;
   serialCount = 0;
   audio.spk.pause();
-  
+  // twinkle
   while(i < signalLength)
   {
     if(pc.readable())
@@ -102,12 +106,51 @@ void loadSignal(void)
       if(serialCount == 5)
       {
         serialInBuffer[serialCount] = '\0';
-        signal_arr[i] = (float) atof(serialInBuffer);
+        signal_twinkle[i] = (float) atof(serialInBuffer);
         serialCount = 0;
         i++;
       }
     }
   }  
+
+  //birthday
+  i = 0;
+  serialCount = 0;
+  while(i < signalLength)
+  {
+    if(pc.readable())
+    {
+      serialInBuffer[serialCount] = pc.getc();  // get char 
+      serialCount++;
+      if(serialCount == 5)
+      {
+        serialInBuffer[serialCount] = '\0';
+        signal_birthday[i] = (float) atof(serialInBuffer);
+        serialCount = 0;
+        i++;
+      }
+    }
+  }
+
+  //two tigers
+  i = 0;
+  serialCount = 0;
+  while(i < signalLength)
+  {
+    if(pc.readable())
+    {
+      serialInBuffer[serialCount] = pc.getc();  // get char 
+      serialCount++;
+      if(serialCount == 5)
+      {
+        serialInBuffer[serialCount] = '\0';
+        signal_tiger[i] = (float) atof(serialInBuffer);
+        serialCount = 0;
+        i++;
+      }
+    }
+  }
+  greenLED = 1;
 }
 
 void playNote(int freq)
@@ -136,6 +179,26 @@ void playNote_Taiko(int freq)
   }
 }
 
+void copymusic(int song)
+{
+  int i = 0;
+  for(i=0; i<48; i++)
+  {
+    if(song == 0)
+    { // twinkle
+      signal_arr[i] = signal_twinkle[i];
+    }
+    else if(song == 1)
+    {// birthday
+      signal_arr[i] = signal_birthday[i];
+    }
+    else if (song == 2)
+    {
+      signal_arr[i] = signal_tiger[i];
+    }
+  }
+}
+
 void PlayMusic()
 {  // start play song
   uLCD.cls();
@@ -157,18 +220,13 @@ void PlayMusic()
     uLCD.printf("\nplaying song: \n");
     uLCD.printf("\n TWO TIGERS\n");
   }
-
-  // pc.printf("%d\r\n", now_song);
+  copymusic(now_song);
   wait(5);
-  greenLED = 0;
-  loadSignal();
-  greenLED = 1;
 
   int i =0;
   int f = 0;
   while(i < 48)
   {
-    // uLCD.printf("\nnote: %.3f\n", signal_arr[i]);
     f = int(1000*signal_arr[i]);
     uLCD.cls();
     uLCD.printf("\nfreq = %d\n", f);
@@ -504,7 +562,16 @@ void StoM()
 
 int main(void)
 {
+    greenLED = 1;
+    redLED = 1;
+    blueLED = 1;
+    uLCD.cls();
+    uLCD.printf("\nLat's load music first....\n");
+    wait(3);
+    loadSignal();
     PlayMusic();
+
+
     // _thread_DNN.start(callback(&_queue_DNN, &EventQueue::dispatch_forever));
     // _thread_playmusic.start(callback(&_queue_playmusic, &EventQueue::dispatch_forever));
     _thread_mainmenu.start(callback(&_queue_mainmenu, &EventQueue::dispatch_forever));
