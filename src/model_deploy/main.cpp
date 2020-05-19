@@ -89,7 +89,6 @@ void Gesture();
 void loadSignal(void)
 {
   uLCD.printf("\n in load signal\n");
-  greenLED = 0;
   int i = 0;
   serialCount = 0;
   audio.spk.pause();
@@ -98,19 +97,17 @@ void loadSignal(void)
   {
     if(pc.readable())
     {
-      serialInBuffer[serialCount] = pc.getc();
+      serialInBuffer[serialCount] = pc.getc();  // get char 
       serialCount++;
       if(serialCount == 5)
       {
         serialInBuffer[serialCount] = '\0';
         signal_arr[i] = (float) atof(serialInBuffer);
-        uLCD.printf("\n%.3f\n",signal_arr[i] );
         serialCount = 0;
         i++;
       }
     }
-  }
-  greenLED = 1;
+  }  
 }
 
 void playNote(int freq)
@@ -142,6 +139,9 @@ void playNote_Taiko(int freq)
 void PlayMusic()
 {  // start play song
   uLCD.cls();
+  greenLED = 1;
+  redLED = 1;
+  blueLED = 1;
   if(now_song == 0)
   {
     uLCD.printf("\nplaying song: \n");
@@ -158,19 +158,26 @@ void PlayMusic()
     uLCD.printf("\n TWO TIGERS\n");
   }
 
-  pc.printf("%d\r\n", now_song);
+  // pc.printf("%d\r\n", now_song);
   wait(5);
+  greenLED = 0;
   loadSignal();
+  greenLED = 1;
+
   int i =0;
+  int f = 0;
   while(i < 48)
   {
-    uLCD.printf("\nnote: %.3f\n", signal_arr[i]);
-    playNote(signal_arr[i]);
+    // uLCD.printf("\nnote: %.3f\n", signal_arr[i]);
+    f = int(1000*signal_arr[i]);
+    uLCD.cls();
+    uLCD.printf("\nfreq = %d\n", f);
+    playNote(f);
     wait(0.1);
     i++;
   }
   SELECT = 0;
-  Gesture();
+  // Gesture();
 
 }
 
@@ -497,13 +504,16 @@ void StoM()
 
 int main(void)
 {
+    PlayMusic();
     // _thread_DNN.start(callback(&_queue_DNN, &EventQueue::dispatch_forever));
     // _thread_playmusic.start(callback(&_queue_playmusic, &EventQueue::dispatch_forever));
     _thread_mainmenu.start(callback(&_queue_mainmenu, &EventQueue::dispatch_forever));
+    
+    
     Button.rise(&StoM);
     
     /******** SET UP THE MODEL ********/
-
+    /*
     // Map the model into a usable data structure. This doesn't involve any
     // copying or parsing, it's a very lightweight operation.
     //const tflite::Model* model = tflite::GetModel(g_magic_wand_model_data);
@@ -562,8 +572,8 @@ int main(void)
     }
 
     error_reporter->Report("Set up successful...\n");
-    /************************/
-
+    */
+    /*
       // if SW2 is pressed, interrupt current and enter the mode menu
       // if SW3 is pressed, select the choice
         redLED = 1;
@@ -585,5 +595,5 @@ int main(void)
         blueLED = 1;
         uLCD.cls();
         SELECT = 0;
-        Display_song();
+        Display_song(); */
 }
