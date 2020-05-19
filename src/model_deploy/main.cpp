@@ -235,7 +235,7 @@ void PlayMusic()
     i++;
   }
   SELECT = 0;
-  // Gesture();
+  Gesture();
 
 }
 
@@ -562,16 +562,6 @@ void StoM()
 
 int main(void)
 {
-    greenLED = 1;
-    redLED = 1;
-    blueLED = 1;
-    uLCD.cls();
-    uLCD.printf("\nLat's load music first....\n");
-    wait(3);
-    loadSignal();
-    PlayMusic();
-
-
     // _thread_DNN.start(callback(&_queue_DNN, &EventQueue::dispatch_forever));
     // _thread_playmusic.start(callback(&_queue_playmusic, &EventQueue::dispatch_forever));
     _thread_mainmenu.start(callback(&_queue_mainmenu, &EventQueue::dispatch_forever));
@@ -580,7 +570,7 @@ int main(void)
     Button.rise(&StoM);
     
     /******** SET UP THE MODEL ********/
-    /*
+    
     // Map the model into a usable data structure. This doesn't involve any
     // copying or parsing, it's a very lightweight operation.
     //const tflite::Model* model = tflite::GetModel(g_magic_wand_model_data);
@@ -639,28 +629,33 @@ int main(void)
     }
 
     error_reporter->Report("Set up successful...\n");
-    */
-    /*
+    /*****************/
+    
       // if SW2 is pressed, interrupt current and enter the mode menu
       // if SW3 is pressed, select the choice
-        redLED = 1;
-        greenLED = 1;
-        blueLED = 1;
-        uLCD.cls();
-        uLCD.textbackground_color(BLACK);
-        uLCD.printf("\nH E L L O\n");
-        uLCD.printf("\nEnter Song Menu\n");
-        uLCD.printf("\n in 5s !\n");
-        uLCD.printf("\nEnjoy!!\n"); 
-        wait(5);
-        
-        // enter song menu
-        //_queue_mainmenu.call_in(5000, Display_song);
-        now_menu = 1; 
-        greenLED = 1;
-        redLED = 1;
-        blueLED = 1;
-        uLCD.cls();
-        SELECT = 0;
-        Display_song(); */
+    
+    redLED = 1;
+    greenLED = 1;
+    blueLED = 1;
+    uLCD.cls();
+    uLCD.textbackground_color(BLACK);
+    uLCD.printf("\nH E L L O\n");
+    uLCD.printf("\nLat's load music first....\n");
+    wait(5);
+    loadSignal();
+    audio.spk.pause();
+    uLCD.printf("\nEnter Song Menu\n");
+    uLCD.printf("\n in 5s !\n");
+    uLCD.printf("\nEnjoy!!\n"); 
+    wait(3);
+
+    // enter song menu
+    //_queue_mainmenu.call_in(5000, Display_song);
+    now_menu = 1; 
+    greenLED = 1;
+    redLED = 1;
+    blueLED = 1;
+    uLCD.cls();
+    SELECT = 0;
+    Display_song(); 
 }
