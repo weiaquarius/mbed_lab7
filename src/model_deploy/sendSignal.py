@@ -10,7 +10,7 @@ waitTime = 0.1
 # read which song should py play 
 song_num = s.readline()
 SONG = int(song_num)
-print("SONG = %d" %(SONG))
+
 # generate the signal table
 if SONG == 0:   
     #TWINKLE
@@ -31,7 +31,7 @@ elif SONG == 1:
                    0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , \
                    0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ]
 
-elif SING == 2:
+elif SONG == 2:
     # TWO TIGER
     signalLength = 48
     signalTable = [261, 294, 330, 261, 261, 294, 330, 261, \
