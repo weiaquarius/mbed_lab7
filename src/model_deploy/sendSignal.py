@@ -20,7 +20,7 @@ twinkle_signalTable = np.array([261, 261, 392, 392, 440, 440, 392, 392, \
 birthday_signalTable = np.array([261, 261, 294, 261, 330, 294, 294, 294, \
                    261, 261, 294, 261, 349, 330, 330, 330, \
                    261, 261, 392, 349, 330, 294, 261, 261, \
-                   330, 330, 294, 261, 330, 294, 294, 294, \
+                   330, 330, 294, 261, 330, 294, 261, 261, \
                    0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , \
                    0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ])
 
@@ -37,9 +37,9 @@ tiger_signalTable = np.array([261, 294, 330, 261, 261, 294, 330, 261, \
 do 261
 re 294
 mi 330
-fa 349
+fa 349 v
 so 392
-la 440 
+la 440 v
 '''
 signalTable = np.append(twinkle_signalTable, birthday_signalTable)
 signalTable = np.append(signalTable, tiger_signalTable)
