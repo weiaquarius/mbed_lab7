@@ -474,10 +474,10 @@ void Gesture()
                                 input_length, should_clear_buffer);
     // If there was no new data,
     // don't try to clear the buffer again and wait until next time
-    // if (!got_data) {
-    //   should_clear_buffer = false;
-    //   continue;
-    // }
+    if (!got_data) {
+      should_clear_buffer = false;
+      continue;
+    }
     // Run inference, and report any error
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
@@ -494,7 +494,7 @@ void Gesture()
 
 
 
-    gesture_index = 0;
+    // gesture_index = 0;
     //now_menu = 1;
     // now_mode = 3;
     // now_song = 0;
